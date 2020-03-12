@@ -1,29 +1,28 @@
-
-import java.util.Scanner;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.Group ;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+
+
+import java.util.Scanner;
 
 public class GlowAirHockeyApp extends Application {
 	private Table table;
 	
 	final static int DELAY = 10;
+	double orgSceneX, orgSceneY;
+	double orgTranslateX, orgTranslateY;
 	
 	public static void main(String[] args) {
 		Application.launch(args);
@@ -89,19 +88,52 @@ public class GlowAirHockeyApp extends Application {
 		center_circle.setFill(Color.RED);
 		center_circle.setCenterX(table.CENTER_X);
 		center_circle.setCenterY(table.CENTER_Y);
+
 		
 		Circle center_circle_cover = new Circle();
 		center_circle_cover.setRadius(75);
 		center_circle_cover.setFill(Color.BLACK);
 		center_circle_cover.setCenterX(table.CENTER_X);
 		center_circle_cover.setCenterY(table.CENTER_Y);
-		
-		Circle center = new Circle();
+
+		 EventHandler<MouseEvent> circleOnMousePressedEventHandler =
+				 new EventHandler<MouseEvent>() {
+
+					 @Override
+					 public void handle(MouseEvent t) {
+						 orgSceneX = t.getSceneX();
+						 orgSceneY = t.getSceneY();
+						 orgTranslateX = ((Circle)(t.getSource())).getTranslateX();
+						 orgTranslateY = ((Circle)(t.getSource())).getTranslateY();
+					 }
+				 };
+
+		 EventHandler<MouseEvent> circleOnMouseDraggedEventHandler =
+				 new EventHandler<MouseEvent>() {
+
+					 @Override
+					 public void handle(MouseEvent t) {
+						 double offsetX = t.getSceneX() - orgSceneX;
+						 double offsetY = t.getSceneY() - orgSceneY;
+						 double newTranslateX = orgTranslateX + offsetX;
+						 double newTranslateY = orgTranslateY + offsetY;
+
+						 ((Circle)(t.getSource())).setTranslateX(newTranslateX);
+						 ((Circle)(t.getSource())).setTranslateY(newTranslateY);
+					 }
+				 };
+
+
+
+		 Circle center = new Circle();
 		center.setRadius(5);
 		center.setFill(Color.RED);
 		center.setCenterX(table.CENTER_X);
 		center.setCenterY(table.CENTER_Y);
-		
+		center.setCursor(Cursor.HAND);
+		center.setOnMousePressed(circleOnMousePressedEventHandler);
+		center.setOnMouseDragged(circleOnMouseDraggedEventHandler);
+
 		Rectangle left_border = new Rectangle();
 		left_border.setX(0);
 		left_border.setY(0);
@@ -165,7 +197,7 @@ public class GlowAirHockeyApp extends Application {
 
 	// This function updates what is necessary with each tick in the timeline.
 	public void updateGame() {
-		table.applyFriction(DELAY);
+		//table.applyFriction(DELAY);
 		table.updatePuckPosition(DELAY);
 		table.updatePaddlePositions(DELAY);
 		table.checkForGoal();
